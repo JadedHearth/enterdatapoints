@@ -4,9 +4,9 @@
 
 import csv
 
-writeMode = "w" # If the csv is properly formatted for this 
-                # it'll append instead of overwrite to avoid
-                # losing data if I cancel
+# Changeable header and filename variable
+HEADER = ["Time"] + ["Metal Temperature"] + ["Outside Temperature"]
+FILENAME = "table.csv"
 
 # A list of various words that could stop the program 
 stopWords = ["exit", "Exit", "EXIT", "stop", "Stop", "STOP", "no", "No", "NO",
@@ -15,9 +15,9 @@ stopWords = ["exit", "Exit", "EXIT", "stop", "Stop", "STOP", "no", "No", "NO",
              "Cease", "CEASE", "leave", "Leave", "LEAVE", "finish", "Finish", 
              "FINISH", ""]
 
-# Changeable header and filename variable
-HEADER = ["Time"] + ["Metal Temperature"] + ["Outside Temperature"]
-FILENAME = "table.csv"
+writeMode = "w" # If the csv is properly formatted for this 
+                # it'll append instead of overwrite to avoid
+                # losing data if I cancel
 
 try:
     with open(FILENAME, "r", newline="") as table:
