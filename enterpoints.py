@@ -1,3 +1,5 @@
+# Python 3.9.17 64-bit
+
 # A script to enter data points easily into a csv file, for
 # my physics EE experiment. Modify for other headers by changing
 # the *header* variable.
@@ -20,8 +22,8 @@ writeMode = "w" # If the csv is properly formatted for this
                 # losing data if I cancel
 
 try:
-    with open(FILENAME, "r", newline="") as table:
-        reader = csv.reader(table, delimiter=" ",
+    with open(FILENAME, "r") as table:
+        reader = csv.reader(table, delimiter="|",
                             quotechar="|", quoting=csv.QUOTE_MINIMAL)
         
         # idk how to properly just read the first one but this does the trick
@@ -30,13 +32,14 @@ try:
         for column in reader: 
             if (column[0] == HEADER[0]): 
                 writeMode = "a"
+                print(column[0])
             break
 except FileNotFoundError:
     writeMode = "x"
     
 
 with open("table.csv", writeMode, newline="") as table:
-    writer = csv.writer(table, delimiter=" ",
+    writer = csv.writer(table, delimiter="|",
                            quotechar="|", quoting=csv.QUOTE_MINIMAL)
     if writeMode == "w": 
         writer.writerow(HEADER)
