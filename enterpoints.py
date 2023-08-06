@@ -11,6 +11,7 @@ import csv
 # Changeable header and filename variable
 HEADER = ["Time"] + ["Metal Temperature"] + ["Outside Temperature"]
 FILENAME = "table.csv" 
+MUSTBENUMBER = True
 
 class TextColors:
     """
@@ -69,28 +70,40 @@ except FileNotFoundError:
 with open("table.csv", writeMode, newline="") as table:
     writer = csv.writer(table, delimiter="|",
                            quotechar="|", quoting=csv.QUOTE_MINIMAL)
-    if writeMode == "w": 
+    if writeMode == "w" or writeMode == "x": 
         writer.writerow(HEADER)
 
-    entryDone = False
+    entriesDone = False
     nextRowToWrite = [None] * len(HEADER)
 
     longestHeaderLength = longestLengthInList(HEADER)
 
-    # Data entry prompts and input
-    while entryDone == False:
+    # Data entry prompts and input with hacky solution for verifying inputs.
+    while entriesDone == False:
         i = 0
         for eachValue in nextRowToWrite:
-            headerDisplay = HEADER[i] + ":" + " " * (longestHeaderLength - len(HEADER[i]) + 1)
-            inputWord = input(f"{TextColors.OKCYAN}Enter the {headerDisplay}{TextColors.ENDC}")
-            if inputWord in stopWords: 
-                entryDone = True
+            while True:
+                headerDisplay = HEADER[i] + ":" + " " * (longestHeaderLength - len(HEADER[i]) + 1)
+                inputWord = input(f"{TextColors.OKCYAN}Enter the {headerDisplay}{TextColors.ENDC}")
+                if inputWord in stopWords: 
+                    entriesDone = True
+                    break
+
+                if MUSTBENUMBER: 
+                    try: 
+                        float(inputWord)
+                    except ValueError:
+                        print(f"{TextColors.FAIL}Not a number.")
+                        continue
+
+                nextRowToWrite[i] = inputWord
+                i += 1
                 break
-            nextRowToWrite[i] = inputWord
-            i += 1
+
+            if entriesDone == True: break
+
         print("") # nicer formatting
-        if entryDone == True: 
-            break
+        if entriesDone == True: break
         writer.writerow(nextRowToWrite)
 
 print(f"{Cursor.UP}{Cursor.CLEAR}{Cursor.UP}{Cursor.CLEAR}{TextColors.OKGREEN}Exited and saved.")
