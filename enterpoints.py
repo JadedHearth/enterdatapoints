@@ -61,7 +61,6 @@ try:
         for column in reader: 
             if (column[0] == HEADER[0]): 
                 writeMode = "a"
-                print(column[0])
             break
 except FileNotFoundError:
     writeMode = "x"
