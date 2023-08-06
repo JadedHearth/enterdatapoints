@@ -3,8 +3,7 @@ Tested with Python 3.9.17 64-bit, MacOS Ventura 13.4.1 (c)
 Escape characters probably only work on *nix, not tested on Windows.
 
 A script to enter data points easily into a csv file, for
-my physics EE experiment. Modify for other headers by changing
-the *header* variable.
+my physics EE experiment.
 """
 
 import csv
@@ -13,8 +12,6 @@ import csv
 HEADER = ["Time"] + ["Metal Temperature"] + ["Outside Temperature"]
 FILENAME = "table.csv" # Desired csv filepath
 MUSTBENUMBER = True # Enforce the entry of numbers
-PRESERVEPREVIOUSFILE = True # Preserve files that have non-matching headers, 
-                            # ex. if the HEADER was previously changed
 
 class TextColors:
     """
@@ -78,20 +75,20 @@ except FileNotFoundError:
 except StopIteration:
     print(f"{TextColors.BOLD}INFO: Preexisting file was blank.", end="\n\n")
 
-answered = False
-if (PRESERVEPREVIOUSFILE == False) and (incorrectFormat): 
-    warningmessage = "WARNING: Overwriting preexisting data."
-    while answered == False:
-        answer = input(f"{TextColors.WARNING}{warningmessage} {TextColors.BOLD}Continue? (Y/n){TextColors.ENDC}\n\n")
-        if answer in ResponseType.NO: 
-            answered = True
-            PRESERVEPREVIOUSFILE = True # Why did you change the config value if you answer no to this? bro
-        elif answer in ResponseType.YES or answer == "": 
-            answered = True
+preservefile = None
+if incorrectFormat: 
+    warningmessage = f"WARNING: The file specified by {TextColors.CONFIGVALUE}FILENAME{TextColors.WARNING} has a header that does not match {TextColors.CONFIGVALUE}HEADER{TextColors.WARNING}." 
+    while preservefile == None:
+        answer = input(f"{TextColors.WARNING}{warningmessage} {TextColors.ENDC}{TextColors.BOLD}Overwrite? (y/N):{TextColors.ENDC} ")
+        if answer in ResponseType.NO or answer == "": 
+            preservefile = True
+        elif answer in ResponseType.YES: 
+            preservefile = False
         else:
             warningmessage = f"{TextColors.ENDC}Incorrect response. Please retry."
 
-if (incorrectFormat == False) or (incorrectFormat == True and PRESERVEPREVIOUSFILE == False):
+if (not incorrectFormat) or (not preservefile):
+    exitMessage = "Exited."
     with open("table.csv", writeMode, newline="") as table:
         writer = csv.writer(table, delimiter=",",
                             quotechar="\"", quoting=csv.QUOTE_NONNUMERIC)
@@ -100,7 +97,7 @@ if (incorrectFormat == False) or (incorrectFormat == True and PRESERVEPREVIOUSFI
 
         entriesDone = False
         nextRowToWrite = [None] * len(HEADER)
-        i=0
+        i = 0
         longestHeaderLength = longestLengthInList(HEADER)
 
         # Data entry prompts and input with hacky solution for verifying inputs.
@@ -130,9 +127,9 @@ if (incorrectFormat == False) or (incorrectFormat == True and PRESERVEPREVIOUSFI
             print("") # newline
             if entriesDone == True: break
             writer.writerow(nextRowToWrite)
+            exitMessage = "Exited and saved."
 
-    print(f"{Cursor.UP}{Cursor.CLEAR}" * (i + 2) + f"{TextColors.OKGREEN}Exited and saved.")
+    print(f"{Cursor.UP}{Cursor.CLEAR}" * (i + 2) + f"{TextColors.OKGREEN}{exitMessage}")
 
 else: 
-    if not answered: print(f"{TextColors.WARNING}The file specified by {TextColors.CONFIGVALUE}FILENAME{TextColors.WARNING} has a header that does not match {TextColors.CONFIGVALUE}HEADER{TextColors.WARNING}.")
-    print(f"{TextColors.WARNING}Exiting to avoid overwriting preexisting data.", end="\n\n")
+    print(f"{TextColors.WARNING}Exiting to avoid overwriting preexisting data.")
