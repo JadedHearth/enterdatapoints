@@ -9,9 +9,9 @@ my physics EE experiment.
 import csv
 
 # Configuration variables
-HEADER = ["Time"] + ["Metal Temperature"] + ["Outside Temperature"]
-FILENAME = "table.csv" # Desired csv filepath
-MUSTBENUMBER = True # Enforce the entry of numbers
+HEADER = ["Time"] + ["Metal Temperature"] + ["Outside Temperature"] # (Any: list).
+FILENAME = "table.csv" # (Any: string) Desired .csv filepath.
+MUSTBENUMBER = True # (True | False) Enforce the entry of numbers.
 
 class TextColors:
     """
@@ -29,7 +29,7 @@ class TextColors:
 
 class Cursor:
     """Cursor manipulation escape sequences."""
-    UP = "\033[1A" # Moves cursor up one line
+    UP = "\033[1A" # Moves cursor up one line.
     CLEAR = "\x1b[2K" # Erases current line.
 
 def longestLengthInList(list):
@@ -54,9 +54,9 @@ class ResponseType:
 
 writeMode = "w" # If the csv is properly formatted for this 
                 # it'll append instead of overwrite to avoid
-                # losing data if cancelled
+                # losing data if cancelled.
 
-incorrectFormat = False # flag for the incorrect format. 
+incorrectFormat = False # Flag for the incorrect format. 
 
 try:
     with open(FILENAME, "r") as table:
