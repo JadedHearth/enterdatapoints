@@ -1,21 +1,49 @@
-# Python 3.9.17 64-bit
+""" Python 3.9.17 64-bit
+Escape characters probably only work on *nix, not tested on Windows.
 
-# A script to enter data points easily into a csv file, for
-# my physics EE experiment. Modify for other headers by changing
-# the *header* variable.
+A script to enter data points easily into a csv file, for
+my physics EE experiment. Modify for other headers by changing
+the *header* variable.
+"""
 
 import csv
 
 # Changeable header and filename variable
 HEADER = ["Time"] + ["Metal Temperature"] + ["Outside Temperature"]
-FILENAME = "table.csv"
+FILENAME = "table.csv" 
 
-# A list of various words that could stop the program 
+class TextColors:
+    """
+    A list of console printing color escape characters.
+    """
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
+
+class Cursor:
+    """Cursor manipulation escape codes."""
+    UP = "\033[1A" # Moves cursor up one line
+    CLEAR = "\x1b[2K" # Erases current line.
+
+def longestLengthInList(list):
+    """ Returns the int length of longest string in the given list."""
+    headerLengths = []
+    for headerItem in list:
+        headerLengths.append(len(headerItem))
+    return int(max(headerLengths))
+
+# A list of various words that could stop the program. Includes blank and newline.
 stopWords = ["exit", "Exit", "EXIT", "stop", "Stop", "STOP", "no", "No", "NO",
              "arret", "Arret", "ARRET", "不", "nie", "Nie", "NIE", "non", "Non",
              "NON", "halt", "Halt", "HALT", "desist", "Desist", "DESIST", "cease", 
              "Cease", "CEASE", "leave", "Leave", "LEAVE", "finish", "Finish", 
-             "FINISH", ""]
+             "FINISH", "", "\n"]
 
 writeMode = "w" # If the csv is properly formatted for this 
                 # it'll append instead of overwrite to avoid
@@ -47,16 +75,22 @@ with open("table.csv", writeMode, newline="") as table:
     entryDone = False
     nextRowToWrite = [None] * len(HEADER)
 
+    longestHeaderLength = longestLengthInList(HEADER)
+
     # Data entry prompts and input
     while entryDone == False:
         i = 0
         for eachValue in nextRowToWrite:
-            inputWord = input("Enter the {headerName}: ".format(headerName = HEADER[i]))
+            headerDisplay = HEADER[i] + ":" + " " * (longestHeaderLength - len(HEADER[i]) + 1)
+            inputWord = input(f"{TextColors.OKCYAN}Enter the {headerDisplay}{TextColors.ENDC}")
             if inputWord in stopWords: 
                 entryDone = True
                 break
             nextRowToWrite[i] = inputWord
             i += 1
         print("") # nicer formatting
-        if entryDone == True: break
+        if entryDone == True: 
+            break
         writer.writerow(nextRowToWrite)
+
+print(f"{Cursor.UP}{Cursor.CLEAR}{Cursor.UP}{Cursor.CLEAR}{TextColors.OKGREEN}Exited and saved.")
