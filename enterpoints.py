@@ -1,5 +1,5 @@
 """ 
-Python 3.9.17 64-bit
+Tested with Python 3.9.17 64-bit, MacOS Ventura 13.4.1 (c)
 Escape characters probably only work on *nix, not tested on Windows.
 
 A script to enter data points easily into a csv file, for
@@ -9,10 +9,12 @@ the *header* variable.
 
 import csv
 
-# Changeable header and filename variable
+# Configuration variables
 HEADER = ["Time"] + ["Metal Temperature"] + ["Outside Temperature"]
-FILENAME = "table.csv" 
-MUSTBENUMBER = True
+FILENAME = "table.csv" # Desired csv filepath
+MUSTBENUMBER = True # Enforce the entry of numbers
+PRESERVEPREVIOUSFILE = True # Preserve files that have non-matching headers, 
+                            # ex. if the HEADER was previously changed
 
 class TextColors:
     """
@@ -49,61 +51,69 @@ stopWords = ["exit", "Exit", "EXIT", "stop", "Stop", "STOP", "no", "No", "NO",
 
 writeMode = "w" # If the csv is properly formatted for this 
                 # it'll append instead of overwrite to avoid
-                # losing data if I cancel
+                # losing data if cancelled
+
+incorrectFormat = False # flag to notify user of incorrect format without overriding
+                        # the table.csv file
 
 try:
     with open(FILENAME, "r") as table:
         reader = csv.reader(table, delimiter="|",
                             quotechar="|", quoting=csv.QUOTE_MINIMAL)
         
-        # idk how to properly just read the first one but this does the trick
-        # however it will not work if there's another file with "time" or such
-        # with the same first header name
-        for column in reader: 
-            if (column[0] == HEADER[0]): 
-                writeMode = "a"
-            break
+        # Checks if header matches configured header.
+        i = 0
+        if next(reader) == HEADER:
+            writeMode = "a"
+        else: 
+            incorrectFormat = True
+                
 except FileNotFoundError:
     writeMode = "x"
     
 
-with open("table.csv", writeMode, newline="") as table:
-    writer = csv.writer(table, delimiter="|",
-                           quotechar="|", quoting=csv.QUOTE_MINIMAL)
-    if writeMode == "w" or writeMode == "x": 
-        writer.writerow(HEADER)
+if (incorrectFormat == False) or (incorrectFormat == True and PRESERVEPREVIOUSFILE == False):
+    with open("table.csv", writeMode, newline="") as table:
+        writer = csv.writer(table, delimiter="|",
+                            quotechar="|", quoting=csv.QUOTE_MINIMAL)
+        if writeMode == "w" or writeMode == "x": 
+            writer.writerow(HEADER)
 
-    entriesDone = False
-    nextRowToWrite = [None] * len(HEADER)
-    i=0
-    longestHeaderLength = longestLengthInList(HEADER)
+        entriesDone = False
+        nextRowToWrite = [None] * len(HEADER)
+        i=0
+        longestHeaderLength = longestLengthInList(HEADER)
 
-    # Data entry prompts and input with hacky solution for verifying inputs.
-    while entriesDone == False:
-        i = 0
-        for eachValue in nextRowToWrite:
-            while True:
-                headerDisplay = HEADER[i] + ":" + " " * (longestHeaderLength - len(HEADER[i]) + 1)
-                inputWord = input(f"{TextColors.OKCYAN}Enter the {headerDisplay}{TextColors.ENDC}")
-                if inputWord in stopWords: 
-                    entriesDone = True
+        # Data entry prompts and input with hacky solution for verifying inputs.
+        while entriesDone == False:
+            i = 0
+            for eachValue in nextRowToWrite:
+                while True:
+                    headerDisplay = HEADER[i] + ":" + " " * (longestHeaderLength - len(HEADER[i]) + 1)
+                    inputWord = input(f"{TextColors.OKCYAN}Enter the {headerDisplay}{TextColors.ENDC}")
+                    if inputWord in stopWords: 
+                        entriesDone = True
+                        break
+
+                    if MUSTBENUMBER: 
+                        try: 
+                            float(inputWord)
+                        except ValueError:
+                            print(f"{TextColors.FAIL}Not a number.")
+                            continue
+
+                    nextRowToWrite[i] = inputWord
+                    i += 1
                     break
 
-                if MUSTBENUMBER: 
-                    try: 
-                        float(inputWord)
-                    except ValueError:
-                        print(f"{TextColors.FAIL}Not a number.")
-                        continue
+                if entriesDone == True: break
 
-                nextRowToWrite[i] = inputWord
-                i += 1
-                break
-
+            print("") # nicer formatting
             if entriesDone == True: break
+            writer.writerow(nextRowToWrite)
 
-        print("") # nicer formatting
-        if entriesDone == True: break
-        writer.writerow(nextRowToWrite)
+    print(f"{Cursor.UP}{Cursor.CLEAR}" * (i + 2) + f"{TextColors.OKGREEN}Exited and saved.")
 
-print(f"{Cursor.UP}{Cursor.CLEAR}" * (i + 2) + f"{TextColors.OKGREEN}Exited and saved.")
+else: 
+    print(f"{TextColors.WARNING}The file specified by {TextColors.OKBLUE}FILENAME{TextColors.WARNING} has a header that does not match {TextColors.OKBLUE}HEADER{TextColors.WARNING}.")
+    print(f"{TextColors.WARNING}Exiting to avoid overwriting preexisting data.", end="\n\n")
