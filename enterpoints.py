@@ -58,8 +58,8 @@ incorrectFormat = False # flag to notify user of incorrect format without overri
 
 try:
     with open(FILENAME, "r") as table:
-        reader = csv.reader(table, delimiter="|",
-                            quotechar="|", quoting=csv.QUOTE_MINIMAL)
+        reader = csv.reader(table, delimiter=",",
+                            quotechar="|", quoting=csv.QUOTE_ALL)
         
         # Checks if header matches configured header.
         i = 0
@@ -70,12 +70,13 @@ try:
                 
 except FileNotFoundError:
     writeMode = "x"
+except StopIteration: # If blank
+    writeMode = "w"
     
-
 if (incorrectFormat == False) or (incorrectFormat == True and PRESERVEPREVIOUSFILE == False):
     with open("table.csv", writeMode, newline="") as table:
-        writer = csv.writer(table, delimiter="|",
-                            quotechar="|", quoting=csv.QUOTE_MINIMAL)
+        writer = csv.writer(table, delimiter=",",
+                            quotechar="|", quoting=csv.QUOTE_ALL)
         if writeMode == "w" or writeMode == "x": 
             writer.writerow(HEADER)
 
