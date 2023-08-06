@@ -74,7 +74,7 @@ with open("table.csv", writeMode, newline="") as table:
 
     entriesDone = False
     nextRowToWrite = [None] * len(HEADER)
-
+    i=0
     longestHeaderLength = longestLengthInList(HEADER)
 
     # Data entry prompts and input with hacky solution for verifying inputs.
@@ -105,4 +105,4 @@ with open("table.csv", writeMode, newline="") as table:
         if entriesDone == True: break
         writer.writerow(nextRowToWrite)
 
-print(f"{Cursor.UP}{Cursor.CLEAR}{Cursor.UP}{Cursor.CLEAR}{TextColors.OKGREEN}Exited and saved.")
+print(f"{Cursor.UP}{Cursor.CLEAR}" * (i + 2) + f"{TextColors.OKGREEN}Exited and saved.")
