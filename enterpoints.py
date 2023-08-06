@@ -57,5 +57,6 @@ with open("table.csv", writeMode, newline="") as table:
                 break
             nextRowToWrite[i] = inputWord
             i += 1
+        print("") # nicer formatting
         if entryDone == True: break
         writer.writerow(nextRowToWrite)
