@@ -21,7 +21,7 @@ class TextColors:
     A list of console printing color escape characters.
     """
     HEADER = "\033[95m"
-    OKBLUE = "\033[94m"
+    CONFIGVALUE = "\033[94m"
     OKCYAN = "\033[96m"
     OKGREEN = "\033[92m"
     WARNING = "\033[93m"
@@ -53,8 +53,7 @@ writeMode = "w" # If the csv is properly formatted for this
                 # it'll append instead of overwrite to avoid
                 # losing data if cancelled
 
-incorrectFormat = False # flag to notify user of incorrect format without overriding
-                        # the table.csv file
+incorrectFormat = False # flag for the incorrect format. 
 
 try:
     with open(FILENAME, "r") as table:
@@ -70,9 +69,22 @@ try:
                 
 except FileNotFoundError:
     writeMode = "x"
-except StopIteration: # If blank
-    writeMode = "w"
-    
+except StopIteration:
+    print(f"{TextColors.BOLD}INFO: Preexisting file was blank.", end="\n\n")
+
+answered = False
+if (PRESERVEPREVIOUSFILE == False) and (incorrectFormat): 
+    warningmessage = "WARNING: Overwriting preexisting data."
+    while answered == False:
+        answer = input(f"{TextColors.WARNING}{warningmessage} {TextColors.BOLD}Continue? (y/n){TextColors.ENDC}\n\n")
+        if answer == "n" or answer == "N" or answer in stopWords: 
+            answered = True
+            PRESERVEPREVIOUSFILE = True # Why did you change the config value if you answer no to this? bro
+        elif answer == "y" or answer == "Y" or answer == "yes" or answer == "Yes" or answer == "YES": 
+            answered = True
+        else:
+            warningmessage = f"{TextColors.ENDC}Incorrect response. Please retry."
+
 if (incorrectFormat == False) or (incorrectFormat == True and PRESERVEPREVIOUSFILE == False):
     with open("table.csv", writeMode, newline="") as table:
         writer = csv.writer(table, delimiter=",",
@@ -109,12 +121,12 @@ if (incorrectFormat == False) or (incorrectFormat == True and PRESERVEPREVIOUSFI
 
                 if entriesDone == True: break
 
-            print("") # nicer formatting
+            print("") # newline
             if entriesDone == True: break
             writer.writerow(nextRowToWrite)
 
     print(f"{Cursor.UP}{Cursor.CLEAR}" * (i + 2) + f"{TextColors.OKGREEN}Exited and saved.")
 
 else: 
-    print(f"{TextColors.WARNING}The file specified by {TextColors.OKBLUE}FILENAME{TextColors.WARNING} has a header that does not match {TextColors.OKBLUE}HEADER{TextColors.WARNING}.")
+    if not answered: print(f"{TextColors.WARNING}The file specified by {TextColors.CONFIGVALUE}FILENAME{TextColors.WARNING} has a header that does not match {TextColors.CONFIGVALUE}HEADER{TextColors.WARNING}.")
     print(f"{TextColors.WARNING}Exiting to avoid overwriting preexisting data.", end="\n\n")
