@@ -18,7 +18,7 @@ PRESERVEPREVIOUSFILE = True # Preserve files that have non-matching headers,
 
 class TextColors:
     """
-    A list of console printing color escape characters.
+    A list of console printing color escape sequences.
     """
     HEADER = "\033[95m"
     CONFIGVALUE = "\033[94m"
@@ -31,7 +31,7 @@ class TextColors:
     UNDERLINE = "\033[4m"
 
 class Cursor:
-    """Cursor manipulation escape codes."""
+    """Cursor manipulation escape sequences."""
     UP = "\033[1A" # Moves cursor up one line
     CLEAR = "\x1b[2K" # Erases current line.
 
@@ -42,12 +42,18 @@ def longestLengthInList(list):
         headerLengths.append(len(headerItem))
     return int(max(headerLengths))
 
-# A list of various words that could stop the program. Includes blank and newline.
-stopWords = ["exit", "Exit", "EXIT", "stop", "Stop", "STOP", "no", "No", "NO",
-             "arret", "Arret", "ARRET", "不", "nie", "Nie", "NIE", "non", "Non",
-             "NON", "halt", "Halt", "HALT", "desist", "Desist", "DESIST", "cease", 
-             "Cease", "CEASE", "leave", "Leave", "LEAVE", "finish", "Finish", 
-             "FINISH", "", "\n"]
+class ResponseType:
+    """"Different sets of words for different response types"""
+    STOP = ["exit", "Exit", "EXIT", "stop", "Stop", "STOP", "arret", "Arret", "ARRET",
+            "halt", "Halt", "HALT", "desist", "Desist", "DESIST", "cease", "Cease", 
+            "CEASE", "leave", "Leave", "LEAVE", "finish", "Finish", "FINISH"]
+
+    YES = ["y", "Y", "yes", "Yes", "YES", "affirmative", "Affirmative", "AFFIRMATIVE",
+            "oui", "Oui", "OUI", "时", "of course!", "Of course!", "of course", 
+            "Of course"]
+    
+    NO = ["no", "No", "NO", "不", "nie", "Nie", "NIE", "non", "Non",
+            "NON", "n", "N"]
 
 writeMode = "w" # If the csv is properly formatted for this 
                 # it'll append instead of overwrite to avoid
@@ -58,7 +64,7 @@ incorrectFormat = False # flag for the incorrect format.
 try:
     with open(FILENAME, "r") as table:
         reader = csv.reader(table, delimiter=",",
-                            quotechar="|", quoting=csv.QUOTE_ALL)
+                            quotechar="\"", quoting=csv.QUOTE_NONNUMERIC)
         
         # Checks if header matches configured header.
         i = 0
@@ -76,11 +82,11 @@ answered = False
 if (PRESERVEPREVIOUSFILE == False) and (incorrectFormat): 
     warningmessage = "WARNING: Overwriting preexisting data."
     while answered == False:
-        answer = input(f"{TextColors.WARNING}{warningmessage} {TextColors.BOLD}Continue? (y/n){TextColors.ENDC}\n\n")
-        if answer == "n" or answer == "N" or answer in stopWords: 
+        answer = input(f"{TextColors.WARNING}{warningmessage} {TextColors.BOLD}Continue? (Y/n){TextColors.ENDC}\n\n")
+        if answer in ResponseType.NO: 
             answered = True
             PRESERVEPREVIOUSFILE = True # Why did you change the config value if you answer no to this? bro
-        elif answer == "y" or answer == "Y" or answer == "yes" or answer == "Yes" or answer == "YES": 
+        elif answer in ResponseType.YES or answer == "": 
             answered = True
         else:
             warningmessage = f"{TextColors.ENDC}Incorrect response. Please retry."
@@ -88,7 +94,7 @@ if (PRESERVEPREVIOUSFILE == False) and (incorrectFormat):
 if (incorrectFormat == False) or (incorrectFormat == True and PRESERVEPREVIOUSFILE == False):
     with open("table.csv", writeMode, newline="") as table:
         writer = csv.writer(table, delimiter=",",
-                            quotechar="|", quoting=csv.QUOTE_ALL)
+                            quotechar="\"", quoting=csv.QUOTE_NONNUMERIC)
         if writeMode == "w" or writeMode == "x": 
             writer.writerow(HEADER)
 
@@ -104,13 +110,13 @@ if (incorrectFormat == False) or (incorrectFormat == True and PRESERVEPREVIOUSFI
                 while True:
                     headerDisplay = HEADER[i] + ":" + " " * (longestHeaderLength - len(HEADER[i]) + 1)
                     inputWord = input(f"{TextColors.OKCYAN}Enter the {headerDisplay}{TextColors.ENDC}")
-                    if inputWord in stopWords: 
+                    if inputWord in ResponseType.STOP: 
                         entriesDone = True
                         break
 
                     if MUSTBENUMBER: 
                         try: 
-                            float(inputWord)
+                            inputWord = float(inputWord)
                         except ValueError:
                             print(f"{TextColors.FAIL}Not a number.")
                             continue
